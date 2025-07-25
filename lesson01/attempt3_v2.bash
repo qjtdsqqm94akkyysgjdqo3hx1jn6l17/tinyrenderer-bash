@@ -6,6 +6,11 @@
 # https://en.wikipedia.org/wiki/ANSI_escape_code#8-bit
 declare -r RED=9 YELLOW=11 GREEN=10 BLUE=12 PINK=13 BLACK=0 WHITE=15
 
+# basically to work around integer math we scale the numbers up by
+# `ACCURACY_FACTOR` when we do division then `scale_and_round` them down
+# Is this what people called "oversampling"?
+declare ACCURACY_FACTOR=30
+
 # draw_line <x1> <y1> <x2> <y2> <color>
 draw_line(){
     local \
@@ -45,7 +50,8 @@ draw_line(){
         # artificial delay bc it looks cool
         sleep 0.01
         local a_offset="$((a-a1))"
-        local b="$((b1 + (a_offset*b_dist/a_dist)))"
+        local b_scaled="$((ACCURACY_FACTOR*b1 + (ACCURACY_FACTOR*a_offset*b_dist/a_dist)))"
+        local b="$(scale_and_round "$b_scaled" $ACCURACY_FACTOR)"
         if ((steep)); then    # swap them back
             draw_pixel "$b" "$a" "$color"
         else
@@ -54,12 +60,21 @@ draw_line(){
     done
 }
 
+scale_and_round(){
+    # based on https://stackoverflow.com/a/24253318
+    if ((($1*$2)>0)); then
+        printf '%d' "$((($1+$2/2)/$2))"
+    else
+        printf '%d' "$((($1-$2/2)/$2))"
+    fi
+}
+
 source "$(dirname "$0")"/../bash-graphics/graphics.bash
 
 init_canvas 100 100 $BLACK
 
 text "Final Solution"
-sleep 3
+# sleep 3
 
 declare -r ax=7 ay=3 \
            bx=12 by=37 \

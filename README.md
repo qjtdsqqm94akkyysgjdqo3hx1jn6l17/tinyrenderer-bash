@@ -20,3 +20,12 @@ Once again, good question.
 - [ ] `obj` parser, but 100% integer math
 - [ ] Rest of course
 - [ ] Rest of course, but 100% integer math
+
+## Course Progress:
+- [x] Bresenham’s line drawing
+  - [ ] Homework: `obj` wireframe rendering
+- [ ] Triangle rasterization
+- [ ] Barycentric coordinates
+- [ ] Hidden faces removal
+- [ ] Naive camera handling
+- [ ] Better camera

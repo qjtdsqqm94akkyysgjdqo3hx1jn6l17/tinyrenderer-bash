@@ -11,9 +11,12 @@ No AI/vibe coding was used. This bad idea is 100% birth from a human, start to f
 ## Why?
 Once again, good question.
 
+## How?
+The "canvas" initialization and pixel drawing was handled by my `bash-graphics` scripts. Basically it uses ANSI escape sequences to change the printing cursor's position and colors (foreground and background). It then prints a `▀` character, which with both the fg and bg being changable represents 2 vertcally stacked pixels.
+
 ## Performance?
 
-![You Serious??](https://media1.tenor.com/m/g3EePkbZtlkAAAAC/spiderman-j-jonah-jameson.gif)
+![You Serious?](https://media1.tenor.com/m/g3EePkbZtlkAAAAC/spiderman-j-jonah-jameson.gif)
 
 ## TODO:
 - [ ] `obj` parser

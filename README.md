@@ -1,7 +1,6 @@
 # Tinyrenderer, but in bash (and ANSI escape sequences)
 
-<img width="486" height="465" alt="Result from lesson 1" src="https://github.com/user-attachments/assets/0bffcc32-94b6-4f9c-a79c-20b07637a8be" />
-
+<img style="display:inline-block;" max-width="100%" height="auto" alt="Result from lesson 1" src="https://github.com/user-attachments/assets/0bffcc32-94b6-4f9c-a79c-20b07637a8be" />
 
 ## What?
 As is said, this is an attempt to follow `ssloy`'s [tinyrenderer course](https://haqr.eu/tinyrenderer/bresenham/) (older version [here](https://github.com/ssloy/tinyrenderer/wiki)) but without stepping half a foot outside GNU bash & ANSI escape sequences. And as seen from the state of this repo - it's... not really going too well.
@@ -19,16 +18,25 @@ The "canvas" initialization and pixel drawing was handled by my `bash-graphics` 
 ![You Serious?](https://media1.tenor.com/m/g3EePkbZtlkAAAAC/spiderman-j-jonah-jameson.gif)
 
 ## TODO:
-- [ ] `obj` parser
-- [ ] `obj` parser, but 100% integer math
+- [x] `obj` parser
 - [ ] Rest of course
 - [ ] Rest of course, but 100% integer math
+- [ ] **o p t i m i z a t i o n s**
 
 ## Course Progress:
 - [x] Bresenham’s line drawing
-  - [ ] Homework: `obj` wireframe rendering
+  - [x] Homework: `obj` wireframe rendering
 - [ ] Triangle rasterization
 - [ ] Barycentric coordinates
 - [ ] Hidden faces removal
 - [ ] Naive camera handling
 - [ ] Better camera
+
+
+---
+
+## Showoffs:
+https://github.com/user-attachments/assets/5aa307d7-c68b-4b20-b1e1-2c02d0099709
+
+https://github.com/user-attachments/assets/8de77f0b-3de8-4c02-9352-6430864bccb9
+

@@ -23,34 +23,46 @@ draw_line(){
     local y_dist="$((y2 - y1))" || return 1 # something breaks here
     local step=1
 
-    if ((x_dist<0)); then
-        step=-1
-    fi
-
     local steep="$(((x_dist*x_dist) < (y_dist*y_dist)))"
     local a0 b0 a1 b1 a_dist b_dist
+
     if ((steep)); then
         # swap x and y
-        a1="$y1"
-        b1="$x1"
-        a2="$y2"
-        b2="$x2"
-        a_dist="$y_dist"
-        b_dist="$x_dist"
+        declare -n \
+        a1=y1 \
+        b1=x1 \
+        a2=y2 \
+        b2=x2 \
+        a_dist=y_dist \
+        b_dist=x_dist
     else
-        a1="$x1"
-        b1="$y1"
-        a2="$x2"
-        b2="$y2"
-        a_dist="$x_dist"
-        b_dist="$y_dist"
+        declare -n \
+        a1=x1 \
+        b1=y1 \
+        a2=x2 \
+        b2=y2 \
+        a_dist=x_dist \
+        b_dist=y_dist
     fi
 
-    for a in $(seq "$a1" "$step" "$a2"); do
+    step=$((a_dist<0 ? -1 : 1))
+
+    # it might be ugly but it cuts down on the calls quite a bit
+    for ((
+            a=a1,
+            a_offset=0,
+            b_scaled=ACCURACY_FACTOR*b1
+            ;
+            a_offset!=a_dist
+            ;
+            a_offset+=step,
+            a=a1+a_offset,
+            b_scaled=ACCURACY_FACTOR*b1 + ACCURACY_FACTOR*a_offset*b_dist/a_dist
+        ))
+    do
         # artificial delay bc it looks cool
-        sleep 0.01
-        local a_offset="$((a-a1))"
-        local b_scaled="$((ACCURACY_FACTOR*b1 + (ACCURACY_FACTOR*a_offset*b_dist/a_dist)))"
+        # sleep 0.01
+
         local b="$(scale_and_round "$b_scaled" $ACCURACY_FACTOR)"
         if ((steep)); then    # swap them back
             draw_pixel "$b" "$a" "$color"
@@ -62,12 +74,9 @@ draw_line(){
 
 scale_and_round(){
     # based on https://stackoverflow.com/a/24253318
-    if ((($1*$2)>0)); then
-        printf '%d' "$((($1+$2/2)/$2))"
-    else
-        printf '%d' "$((($1-$2/2)/$2))"
-    fi
+    printf '%d' "$((sign=($1*$2)>0 ?1:-1, ($1 + sign*$2/2)/$2))"
 }
+
 
 source "$(dirname "$0")"/../bash-graphics/graphics.bash
 

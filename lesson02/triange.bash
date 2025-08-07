@@ -91,6 +91,87 @@ draw_triangle(){
         y3="${6:?}" \
         color="${7:?}"
 
+    # sorting points by y, based on an answer on stackoverflow
+    # looks ugly, but hey, 2, sometimes 3 comparisons ops on avg is kinda
+    # better than always having to do 3 ops in an exploded bubble sort, right?
+    # r-right??
+    let '
+        y1 < y2 ? (
+            y2 < y3 ? (
+                xa=x1,
+                ya=y1,
+                xb=x2,
+                yb=y2,
+                xc=x3,
+                yc=y3
+            ) : (
+                y1 < y3 ? (
+                    xa=x1,
+                    ya=y1,
+                    xb=x3,
+                    yb=y3,
+                    xc=x2,
+                    yc=y2
+                ) : (
+                    xa=x3,
+                    ya=y3,
+                    xb=x1,
+                    yb=y1,
+                    xc=x2,
+                    yc=y2
+                )
+            )
+        ) : (
+            y1 < y3 ? (
+                xa=x2,
+                ya=y2,
+                xb=x1,
+                yb=y1,
+                xc=x3,
+                yc=y3
+            ) : (
+                y2 < y3 ? (
+                    xa=x2,
+                    ya=y2,
+                    xb=x3,
+                    yb=y3,
+                    xc=x1,
+                    yc=y1
+                ) : (
+                    xa=x3,
+                    ya=y3,
+                    xb=x2,
+                    yb=y2,
+                    xc=x1,
+                    yc=y1
+                )
+            )
+        ),
+        step=xb < xc ? 1 : -1
+    '
+
+    # if ((ya==yb || ya==yc)); then
+    #     # should we attempt to draw a line
+    #     return 0;
+    # fi
+    for ((y=ya; y < yb; y++)); do
+        # rasterized the 2 sides
+        # we don't have to worry about yb-ya==0 with the for cond there
+        local x_edge_1=$((xa+(y-ya)*(xb-xa)/(yb-ya)))
+        local x_edge_2=$((xa+(y-ya)*(xc-xa)/(yc-ya)))
+        for ((x=x_edge_1; x!=x_edge_2+step; x+=step)); do
+            draw_pixel "$x" "$y" "$color"
+        done
+    done
+    for ((y=yb; y < yc + 1; y++)); do
+        # rasterized the 2 sides
+
+        local x_edge_1=$((yc == yb ? xb : xb+(y-yb)*(xc-xb)/(yc-yb)))
+        local x_edge_2=$((xa+(y-ya)*(xc-xa)/(yc-ya)))
+        for ((x=x_edge_1; x!=x_edge_2+step; x+=step)); do
+            draw_pixel "$x" "$y" "$color"
+        done
+    done
     draw_line "$x1" "$y1" "$x2" "$y2" "$color"
     draw_line "$x2" "$y2" "$x3" "$y3" "$color"
     draw_line "$x3" "$y3" "$x1" "$y1" "$color"

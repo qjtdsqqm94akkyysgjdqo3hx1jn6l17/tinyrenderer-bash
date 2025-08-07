@@ -150,31 +150,58 @@ draw_triangle(){
         step=xb < xc ? 1 : -1
     '
 
-    # if ((ya==yb || ya==yc)); then
-    #     # should we attempt to draw a line
-    #     return 0;
-    # fi
-    for ((y=ya; y < yb; y++)); do
+    # stuff everything inside a bash arithmetic... thing seems to be the
+    # way to go for better performance
+    for ((
+            y=ya,
+            x_delta_ba=xb-xa,
+            y_delta_ba=yb-ya,
+            ba_sign=(x_delta_ba*y_delta_ba > 0 ? 1 : -1),
+            x_delta_ca=xc-xa,
+            y_delta_ca=yc-ya,
+            ca_sign=(x_delta_ca*y_delta_ca > 0 ? 1 : -1),
+            x_edge_1=x_edge_2=xa
+            ;
+            y < yb
+            ;
+            (y++),
+            x_edge_1=xa+((y-ya)*x_delta_ba + ba_sign*y_delta_ba/2)/y_delta_ba,
+            x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
+        )); do
         # rasterized the 2 sides
-        # we don't have to worry about yb-ya==0 with the for cond there
-        local x_edge_1=$((xa+(y-ya)*(xb-xa)/(yb-ya)))
-        local x_edge_2=$((xa+(y-ya)*(xc-xa)/(yc-ya)))
+        # we don't have to worry about 0 division with the for cond there
+        text top
         for ((x=x_edge_1; x!=x_edge_2+step; x+=step)); do
             draw_pixel "$x" "$y" "$color"
         done
     done
-    for ((y=yb; y < yc + 1; y++)); do
-        # rasterized the 2 sides
 
-        local x_edge_1=$((yc == yb ? xb : xb+(y-yb)*(xc-xb)/(yc-yb)))
-        local x_edge_2=$((xa+(y-ya)*(xc-xa)/(yc-ya)))
+        # local x_edge_1=$((yc == yb ? xb : xb+(y-yb)*(xc-xb)/(yc-yb)))
+    for ((
+            y=yb,
+            x_delta_cb=xc-xb,
+            y_delta_cb=yc-yb,
+            cb_sign=(x_delta_cb * y_delta_cb > 0 ? 1 : -1),
+            x_edge_1=xb,
+            x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
+            ;
+            y <= yc
+            ;
+            (y++),
+            x_edge_1=xb+((y-yb)*x_delta_cb + cb_sign*y_delta_cb/2)/y_delta_cb,
+            x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
+        )); do
+            text bottom
+
         for ((x=x_edge_1; x!=x_edge_2+step; x+=step)); do
             draw_pixel "$x" "$y" "$color"
         done
     done
-    draw_line "$x1" "$y1" "$x2" "$y2" "$color"
-    draw_line "$x2" "$y2" "$x3" "$y3" "$color"
-    draw_line "$x3" "$y3" "$x1" "$y1" "$color"
+
+    # sleep 2
+    # draw_line "$x1" "$y1" "$x2" "$y2" "$color"
+    # draw_line "$x2" "$y2" "$x3" "$y3" "$color"
+    # draw_line "$x3" "$y3" "$x1" "$y1" "$color"
 }
 
 source "$(dirname "$0")"/../bash-graphics/graphics.bash

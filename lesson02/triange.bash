@@ -210,6 +210,9 @@ init_canvas 120 120 $BLACK
 
 draw_triangle   7 45 35 100 45  60 $RED
 draw_triangle 120 35 90   5 45 110 $WHITE
+draw_line 1 75 120 75 $GREEN
 draw_triangle 115 83 80  90 85 120 $GREEN
+draw_triangle 10 20 120  90 88 120 $PINK
+draw_line 1 80 120 80 $GREEN
 
 wait_then_exit_canvas

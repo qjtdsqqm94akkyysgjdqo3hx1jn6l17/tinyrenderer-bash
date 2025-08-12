@@ -5,17 +5,24 @@
 ## What?
 As is said, this is an attempt to follow `ssloy`'s [tinyrenderer course](https://haqr.eu/tinyrenderer/bresenham/) (older version [here](https://github.com/ssloy/tinyrenderer/wiki)) but without stepping half a foot outside GNU bash & ANSI escape sequences. And as seen from the state of this repo - it's... not really going too well.
 
-No AI/vibe coding was used. This bad idea is 100% birth from a human, start to finish.
+No vibe coding/AI that edit the codebase. This bad idea is 100% birth from a human, start to finish.
 
 ## Why?
 Once again, good question.
 
 ## How?
-The "canvas" initialization and pixel drawing was handled by my `bash-graphics` scripts. Basically it uses ANSI escape sequences to change the printing cursor's position and colors (foreground and background). It then prints a `▀` character, which with both the fg and bg being changable represents 2 vertcally stacked pixels.
+The "canvas" initialization and pixel drawing was handled by my `bash-graphics` scripts. Basically it uses ANSI escape sequences to change the printing cursor's position and colors (foreground and background). It then prints a `▀` character, which with both the fg and bg being changeable represents 2 vertically stacked pixels.
 
 ## Performance?
 
 ![You Serious?](https://media1.tenor.com/m/g3EePkbZtlkAAAAC/spiderman-j-jonah-jameson.gif)
+
+## Run
+1. `git clone` this
+2. Open terminal in root of project & `git submodule init`
+3. `bash lesson<number>/<filename>.bash`
+  - If it complains about the terminal being too small, hit Ctrl+- a whole bunch and  try again.
+
 
 ## TODO:
 - [x] `obj` parser
@@ -26,7 +33,12 @@ The "canvas" initialization and pixel drawing was handled by my `bash-graphics` 
 ## Course Progress:
 - [x] Bresenham’s line drawing
   - [x] Homework: `obj` wireframe rendering
-- [ ] Triangle rasterization
+- [x] Triangle rasterization
+  - [ ] make it so where rendering big triangles don't seemingly crashes my Desktop
+  - [ ] Bug squashing
+  - [ ] Bug squashing
+  - [ ] Bug squashing
+  - [ ] Bug sq
 - [ ] Barycentric coordinates
 - [ ] Hidden faces removal
 - [ ] Naive camera handling
@@ -39,4 +51,3 @@ The "canvas" initialization and pixel drawing was handled by my `bash-graphics` 
 https://github.com/user-attachments/assets/5aa307d7-c68b-4b20-b1e1-2c02d0099709
 
 https://github.com/user-attachments/assets/8de77f0b-3de8-4c02-9352-6430864bccb9
-

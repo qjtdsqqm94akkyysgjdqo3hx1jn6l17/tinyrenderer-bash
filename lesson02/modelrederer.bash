@@ -10,6 +10,8 @@ declare -r RED=9 YELLOW=11 GREEN=10 BLUE=12 PINK=13 BLACK=0 WHITE=15 \
 trap 'close_canvas; exit 0;' INT
 trap 'sleep 2; wait_then_exit_canvas; exit 0;' QUIT
 
+
+# trigger warning for BOGUS schizo code
 draw_triangle(){
     declare -i \
         x1="${1:?}" \
@@ -75,36 +77,46 @@ draw_triangle(){
                     yc=y1
                 )
             )
-        ),
-        step=xb < xc ? 1 : -1
+        )
+        '
+    # I thought I was OH SO CLEVER, straight up not caring if a side is on the left or right by calculate the step once up here.
+    # alas I didn't account for cases where
+
+    # Welp, we gonna abuse the cross product again
+    # vec(AB)⨯vec(AC)>0 if AC (the longer side) is to the left of AB, which mean we need to go right to left (step = -1)
+    let '
+        cross_product_ab_ac=((xb-xa)*(yc-ya) - (yb-ya)*(xc-xa)),
+        step=(cross_product_ab_ac < 0) ? 1 : -1
     '
 
     if ((ya == yb && yb == yc)); then
         return 0
     fi
+    # echo "A=($xa, $ya);B=($xb, $yb);C=($xc, $yc);"  >&2
 
+    local x_delta_ba y_delta_ba ba_sign x_delta_ca y_delta_ca ca_sign x_edge_1 x_edge_2
     # stuff everything inside a bash arithmetic... thing seems to be the
     # way to go for better performance
     for ((
             y=ya,
             x_delta_ba=xb-xa,
             y_delta_ba=yb-ya,
-            ba_sign=(x_delta_ba*y_delta_ba > 0 ? 1 : -1),
+            ba_sign=(x_delta_ba*y_delta_ba < 0 ? -1 : 1),
             x_delta_ca=xc-xa,
             y_delta_ca=yc-ya,
-            ca_sign=(x_delta_ca*y_delta_ca > 0 ? 1 : -1),
+            ca_sign=(x_delta_ca*y_delta_ca < 0 ? -1 : 1),
             x_edge_1=x_edge_2=xa
             ;
             y < yb
             ;
-            (y++),
+            (++y),
             x_edge_1=xa+((y-ya)*x_delta_ba + ba_sign*y_delta_ba/2)/y_delta_ba,
             x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
         )); do
         # rasterized the 2 sides
         # we don't have to worry about 0 division with the for cond there
-        text top
-        for ((x=x_edge_1; (x_edge_2-x)*step > -1; x+=step)); do
+        # declare -p x_edge_1 x_edge_2 step >&2
+        for ((x=x_edge_1; ((x_edge_2-x)*step) >= 0; x+=step)); do
             draw_pixel "$x" "$y" "$color"
         done
     done
@@ -114,7 +126,7 @@ draw_triangle(){
             y=yb,
             x_delta_cb=xc-xb,
             y_delta_cb=yc!=yb ? yc-yb : 999999999,
-            cb_sign=(x_delta_cb * y_delta_cb > 0 ? 1 : -1),
+            cb_sign=(x_delta_cb * y_delta_cb < 0 ? -1 : 1),
             x_edge_1=xb,
             x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
             ;
@@ -124,9 +136,9 @@ draw_triangle(){
             x_edge_1=xb+((y-yb)*x_delta_cb + cb_sign*y_delta_cb/2)/y_delta_cb,
             x_edge_2=xa+((y-ya)*x_delta_ca + ca_sign*y_delta_ca/2)/y_delta_ca
         )); do
-            text bottom
 
-        for ((x=x_edge_1; (x_edge_2-x)*step > -1; x+=step)); do
+        # declare -p x_edge_1 x_edge_2 step >&2
+        for ((x=x_edge_1; ((x_edge_2-x)*step) >= 0; x+=step)); do
             draw_pixel "$x" "$y" "$color"
         done
     done
@@ -177,6 +189,10 @@ let '
 for triangle in "${obj_triangles[@]}"; do
     read -a vert_idx <<<"$triangle" && {
         # sorry quads, you're not welcome here
+        if [[ "${#vert_idx[@]}" -ne 3 ]]; then
+            error "Something is broky woky"
+        fi
+
         vertices=()
         for idx in {0..2}; do
             read x_val y_val _ <<< "${obj_vertexes[${vert_idx[idx]}]}" && \
@@ -195,16 +211,26 @@ for triangle in "${obj_triangles[@]}"; do
         # declare -p triangle vertices
 
         # sleep 3
-        [[ ${#vertices[@]} -ne 6 ]] && { text 'Something is EXTRA wrong, but well, whatever...'; continue; }
+        [[ "${#vertices[@]}" -ne 6 ]] && { text 'Something is EXTRA wrong, but well, whatever...'; continue; }
 
         # some kinda backface culling black magic
         # 2times the `signed_triangle_area`
         # in https://haqr.eu/tinyrenderer/rasterization/#putting-all-together-back-face-culling
         if (( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )<2)); then continue; fi
 
-        draw_triangle "${vertices[@]}" "$(((RANDOM%14)+1))"
-        text "drawing done"
-    } || { text 'Something is wrong, but well, whatever...'; continue; }
+        draw_pixel "${vertices[0]}" "${vertices[1]}" '196'
+        draw_pixel "${vertices[2]}" "${vertices[3]}" '196'
+        draw_pixel "${vertices[4]}" "${vertices[5]}" '196'
+
+        sleep 0.5
+        # read
+
+        # text "Last triangle with A=$(( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )))"
+        # declare -p vertices
+
+        draw_triangle "${vertices[@]}" "$(((RANDOM%14)+1))" || error 'Something is wrong, but well, whatever...'
+        # text "drawing done"
+    } || { error 'Something is wrong, but well, whatever...'; }
 done
 
 wait_then_exit_canvas

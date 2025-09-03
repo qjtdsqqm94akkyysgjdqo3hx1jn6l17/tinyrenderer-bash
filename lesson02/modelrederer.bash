@@ -218,17 +218,17 @@ for triangle in "${obj_triangles[@]}"; do
         # in https://haqr.eu/tinyrenderer/rasterization/#putting-all-together-back-face-culling
         if (( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )<2)); then continue; fi
 
-        draw_pixel "${vertices[0]}" "${vertices[1]}" '196'
-        draw_pixel "${vertices[2]}" "${vertices[3]}" '196'
-        draw_pixel "${vertices[4]}" "${vertices[5]}" '196'
+        # draw_pixel "${vertices[0]}" "${vertices[1]}" '196'
+        # draw_pixel "${vertices[2]}" "${vertices[3]}" '196'
+        # draw_pixel "${vertices[4]}" "${vertices[5]}" '196'
 
-        sleep 0.5
+        # sleep 0.5
         # read
 
         # text "Last triangle with A=$(( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )))"
         # declare -p vertices
 
-        draw_triangle "${vertices[@]}" "$(((RANDOM%14)+1))" || error 'Something is wrong, but well, whatever...'
+        draw_triangle "${vertices[@]}" "$(((RANDOM%215)+17))" || error 'Something is wrong, but well, whatever...'
         # text "drawing done"
     } || { error 'Something is wrong, but well, whatever...'; }
 done

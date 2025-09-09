@@ -153,10 +153,10 @@ source "$(dirname "$0")"/../bash-graphics/graphics.bash
 
 source "$(dirname "$0")"/../obj-parser/parser.bash
 
-declare -a obj_vertexes obj_triangles
+declare -a obj_vertexes obj_faces
 
 echo loading obj: "$OBJ_PATH"
-load_obj "$OBJ_PATH" obj_vertexes obj_triangles
+load_obj "$OBJ_PATH" obj_vertexes obj_faces
 
 echo "init canvas with size ${CANVAS_SIZE/x/ } $BG_COLOR"
 sleep 1
@@ -186,49 +186,50 @@ let '
 # # exit 0
 # sleep 3
 
-for triangle in "${obj_triangles[@]}"; do
-    read -a vert_idx <<<"$triangle" && {
-        # sorry quads, you're not welcome here
-        if [[ "${#vert_idx[@]}" -ne 3 ]]; then
+for face in "${obj_faces[@]}"; do
+    read -a vert_idx <<<"$face" && {
+        if [[ "${#vert_idx[@]}" -lt 3 ]]; then
             error "Something is broky woky"
         fi
 
-        vertices=()
+        # project face to canvas xy coords
+        points_flat=()
+        # sorry quads, you're welcomed but not acknowledged here
         for idx in {0..2}; do
             read x_val y_val _ <<< "${obj_vertexes[${vert_idx[idx]}]}" && \
             let '
                 x_idx=idx<<1,
                 y_idx=x_idx+1,
-                vertices[x_idx]= ((x_val*SCALER + TWO_OBJ_AF/2)/TWO_OBJ_AF)+1,
-                vertices[y_idx]= ((y_val*SCALER + TWO_OBJ_AF/2)/TWO_OBJ_AF)+1
+                points_flat[x_idx]= ((x_val*SCALER + TWO_OBJ_AF/2)/TWO_OBJ_AF)+1,
+                points_flat[y_idx]= ((y_val*SCALER + TWO_OBJ_AF/2)/TWO_OBJ_AF)+1
             '
             # sleep 1.5
             # since TWO_OBJ_AF, SCALER and x_val are always >0 we don't need a check here
         done
-        # text "triangle: ${vertices[@]}"
+        # text "face: ${points_flat[@]}"
         # text
         # echo
-        # declare -p triangle vertices
+        # declare -p face points_flat
 
         # sleep 3
-        [[ "${#vertices[@]}" -ne 6 ]] && { text 'Something is EXTRA wrong, but well, whatever...'; continue; }
+        [[ "${#points_flat[@]}" -ne 6 ]] && { text 'Something is EXTRA wrong, but well, whatever...'; continue; }
 
         # some kinda backface culling black magic
         # 2times the `signed_triangle_area`
         # in https://haqr.eu/tinyrenderer/rasterization/#putting-all-together-back-face-culling
-        if (( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )<2)); then continue; fi
+        if (( ( (points_flat[3]-points_flat[1])*(points_flat[2]+points_flat[0]) + (points_flat[5]-points_flat[3])*(points_flat[4]+points_flat[2]) + (points_flat[1]-points_flat[5])*(points_flat[0]+points_flat[4]) )<2)); then continue; fi
 
-        # draw_pixel "${vertices[0]}" "${vertices[1]}" '196'
-        # draw_pixel "${vertices[2]}" "${vertices[3]}" '196'
-        # draw_pixel "${vertices[4]}" "${vertices[5]}" '196'
+        # draw_pixel "${points_flat[0]}" "${points_flat[1]}" '196'
+        # draw_pixel "${points_flat[2]}" "${points_flat[3]}" '196'
+        # draw_pixel "${points_flat[4]}" "${points_flat[5]}" '196'
 
         # sleep 0.5
         # read
 
-        # text "Last triangle with A=$(( ( (vertices[3]-vertices[1])*(vertices[2]+vertices[0]) + (vertices[5]-vertices[3])*(vertices[4]+vertices[2]) + (vertices[1]-vertices[5])*(vertices[0]+vertices[4]) )))"
-        # declare -p vertices
+        # text "Last triangle with A=$(( ( (points_flat[3]-points_flat[1])*(points_flat[2]+points_flat[0]) + (points_flat[5]-points_flat[3])*(points_flat[4]+points_flat[2]) + (points_flat[1]-points_flat[5])*(points_flat[0]+points_flat[4]) )))"
+        # declare -p points_flat
 
-        draw_triangle "${vertices[@]}" "$(((RANDOM%215)+17))" || error 'Something is wrong, but well, whatever...'
+        draw_triangle "${points_flat[@]}" "$(((RANDOM%215)+17))" || error 'Something is wrong, but well, whatever...'
         # text "drawing done"
     } || { error 'Something is wrong, but well, whatever...'; }
 done
